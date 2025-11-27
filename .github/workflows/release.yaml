@@ -23,28 +23,44 @@ jobs:
           python-version: "3.13"
 
       - name: Install build
-        run: python -m pip install --upgrade build
+        run: python -m pip install --upgrade build setuptools setuptools-scm
 
-      - name: Find all packages with pyproject.toml
-        id: pkgs
+      - name: Install build tools
         run: |
-          mapfile -t dirs < <(find . -name pyproject.toml -exec dirname {} \; | sort)
-          echo "Found ${#dirs[@]} package(s): ${dirs[*]}"
-          echo "packages=${dirs[*]}" >> "$GITHUB_OUTPUT"
+            python -m pip install --upgrade pip
+            pip install build twine setuptools setuptools_scm
 
-      - name: Build all packages and collect artifacts
+      - name: Build package
         run: |
-          mkdir -p dist/all
-          for dir in ${{ steps.pkgs.outputs.packages }}; do
-            echo "Building $dir"
-            (cd "$dir" && python -m build)
-            cp "$dir"/dist/* dist/all/
-          done
-          echo "All built artifacts:"
-          ls -lh dist/all/
-
-      - name: Create GitHub Release with assets
+            python -m build testpackage
+    
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/all/*
+          files: dist/*
           generate_release_notes: true
+        
+    # TODO: Try out multi-package releases later
+    #   - name: Find all packages with pyproject.toml
+    #     id: pkgs
+    #     run: |
+    #       mapfile -t dirs < <(find . -name pyproject.toml -exec dirname {} \; | sort)
+    #       echo "Found ${#dirs[@]} package(s): ${dirs[*]}"
+    #       echo "packages=${dirs[*]}" >> "$GITHUB_OUTPUT"
+
+    #   - name: Build all packages and collect artifacts
+    #     run: |
+    #       mkdir -p dist/all
+    #       for dir in ${{ steps.pkgs.outputs.packages }}; do
+    #         echo "Building $dir"
+    #         (cd "$dir" && python -m build)
+    #         cp "$dir"/dist/* dist/all/
+    #       done
+    #       echo "All built artifacts:"
+    #       ls -lh dist/all/
+
+    #   - name: Create GitHub Release with assets
+    #     uses: softprops/action-gh-release@v2
+    #     with:
+    #       files: dist/all/*
+    #       generate_release_notes: true
