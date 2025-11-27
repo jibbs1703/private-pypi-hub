@@ -1,35 +1,50 @@
-name: Python Package Release
+name: Release to GitHub Only
 
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
+
+permissions:
+  contents: write
 
 jobs:
-  release:
+  build-and-release:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
 
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine setuptools setuptools_scm
+      - name: Install build
+        run: python -m pip install --upgrade build
 
-    - name: Build package
-      run: |
-        python -m build testpackage
+      - name: Find all packages with pyproject.toml
+        id: pkgs
+        run: |
+          mapfile -t dirs < <(find . -name pyproject.toml -exec dirname {} \; | sort)
+          echo "Found ${#dirs[@]} package(s): ${dirs[*]}"
+          echo "packages=${dirs[*]}" >> "$GITHUB_OUTPUT"
 
-    - name: Publish package to GitHub
-      env:
-        TWINE_USERNAME: "__token__"
-        TWINE_PASSWORD: "${{ secrets.TOKEN_GITHUB }}"
-      run: |
-        python -m twine upload --repository-url https://upload.pypi.org/legacy/ testpackage/dist/*
+      - name: Build all packages and collect artifacts
+        run: |
+          mkdir -p dist/all
+          for dir in ${{ steps.pkgs.outputs.packages }}; do
+            echo "Building $dir"
+            (cd "$dir" && python -m build)
+            cp "$dir"/dist/* dist/all/
+          done
+          echo "All built artifacts:"
+          ls -lh dist/all/
+
+      - name: Create GitHub Release with assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/all/*
+          generate_release_notes: true
