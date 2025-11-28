@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # Private Key Files
+*.htpasswd
 *.pem
 *.key
 second.yaml

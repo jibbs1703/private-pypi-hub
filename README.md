@@ -37,3 +37,23 @@ Set up your own private PyPI server using pypiserver, a PyPI-compatible server, 
 - [GitHub Actions](https://docs.github.com/en/actions)
 
 ---
+```bash
+username - jibbs
+password - jibbs1234
+
+python3 -m twine upload \
+  --username jibbs \
+  --password jibbs1234 \
+  --repository-url http://localhost:8081/ \
+  testpackage/dist/*
+
+ python3 -m twine upload \
+  --repository pypi-main \
+  --config-file ./testpackage/.pypirc \
+  testpackage/dist/* --verbose
+
+ python3 -m twine upload \
+  --repository pypi-dev \
+  --config-file ./testpackage/.pypirc \
+  testpackage/dist/* --verbose
+```
