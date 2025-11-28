@@ -6,7 +6,7 @@ services:
       - 8080:8080
     volumes:
       - type: volume
-        source: pypi-server
+        source: pypi-main-server
         target: /data/packages
     command: -P . -a . /data/packages
     restart: always
@@ -17,10 +17,11 @@ services:
       - 8081:8080
     volumes:
       - type: volume
-        source: pypi-server
+        source: pypi-dev-server
         target: /data/packages
     command: -P . -a . /data/packages
     restart: always
 
 volumes:
-  pypi-server:
+  pypi-main-server:
+  pypi-dev-server:

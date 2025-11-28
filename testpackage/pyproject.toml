@@ -1,6 +1,6 @@
 [project]
 name = "testpackage"
-dynamic = ["version"]
+version = "1.0.0"
 description = "A testpackage to demonstrate a private pypi server"
 keywords = ["testpackage", "pypi-server"]
 readme = "README.md"
@@ -26,8 +26,3 @@ greet = "testpackage.greet:Greet"
 [build-system]
 requires = ["setuptools", "wheel", "setuptools_scm[toml]"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-version_scheme = "release-branch-semver"
-local_scheme = "no-local-version"
-write_to = "testpackage/_version.py"
